@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeleteResult, ILike, Repository } from "typeorm";
+import { DeleteResult, ILike, MoreThan, MoreThanOrEqual, Repository } from "typeorm";
 import { CategoriaService } from "../../categoria/services/categoria.service";
 import { Produto } from "../entities/produto.entity";
 
@@ -35,16 +35,33 @@ export class ProdutoService{
         })
 
         if(!produto){
-            throw new HttpException('Produto não encontrada!', HttpStatus.NOT_FOUND)
+            throw new HttpException('Produto não encontrado!', HttpStatus.NOT_FOUND)
         }
         return produto;
         
     }
 
-    async findByTitulo(titulo: string): Promise<Produto[]>{
+
+
+    async listByPreco(minPreco: number): Promise<Produto[]>{
+        return this.produtoRepository.find({
+            where: {
+                preco: MoreThanOrEqual(minPreco)
+                },
+                order: {
+                    preco: 'ASC'
+                }
+        });
+    }
+
+
+
+
+
+    async findByNome(nome: string): Promise<Produto[]>{
         return this.produtoRepository.find({
             where:{
-                titulo: ILike(`%${titulo}%`) // Insensitive Like - Ignora a sensitividade do banco e procura de forma insensitiva
+                nome: ILike(`%${nome}%`) 
             },
             relations:{
                 categoria: true

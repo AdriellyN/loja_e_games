@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, 
+    HttpStatus, Param, ParseFloatPipe, ParseIntPipe, Post, Put, Query } from "@nestjs/common";
 import { Produto } from "../entities/produto.entity";
 import { ProdutoService } from "../services/produto.service";
 
@@ -21,10 +22,16 @@ export class ProdutoController{
         return this.produtoService.findById(id);
     }
 
-    @Get('/titulo/:titulo')
+    @Get('/nome/:nome')
     @HttpCode(HttpStatus.OK)
-    findByTitulo(@Param('titulo') titulo: string): Promise<Produto[]>{
-        return this.produtoService.findByTitulo(titulo);
+    findByNome(@Param('nome') nome: string): Promise<Produto[]>{
+        return this.produtoService.findByNome(nome);
+    }
+
+    @Get('/preco/:listar-crescente')
+    @HttpCode(HttpStatus.OK)
+    listByPreco(@Query('minPreco', ParseIntPipe) minPreco: number): Promise<Produto[]>{
+        return this.produtoService.listByPreco(minPreco);
     }
 
     @Post()
