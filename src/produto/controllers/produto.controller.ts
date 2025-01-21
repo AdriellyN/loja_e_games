@@ -30,8 +30,14 @@ export class ProdutoController{
 
     @Get('/preco/:listar-crescente')
     @HttpCode(HttpStatus.OK)
-    listByPreco(@Query('minPreco', ParseIntPipe) minPreco: number): Promise<Produto[]>{
-        return this.produtoService.listByPreco(minPreco);
+    listPrecoCrescente(@Query('minPreco', ParseFloatPipe) minPreco: number): Promise<Produto[]>{
+        return this.produtoService.listPrecoCrescente(minPreco);
+    }
+
+    @Get('/preco/:listar-decrescente')
+    @HttpCode(HttpStatus.OK)
+    listPrecoDecrescente(@Query('minPreco', ParseFloatPipe) minPreco: number): Promise<Produto[]>{
+        return this.produtoService.listPrecoDecrescente(minPreco);
     }
 
     @Post()

@@ -1,94 +1,103 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeleteResult, ILike, MoreThan, MoreThanOrEqual, Repository } from "typeorm";
+import { DeleteResult, ILike, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from "typeorm";
 import { CategoriaService } from "../../categoria/services/categoria.service";
 import { Produto } from "../entities/produto.entity";
 
 
 
 @Injectable()
-export class ProdutoService{
+export class ProdutoService {
 
     constructor(
         @InjectRepository(Produto)
         private produtoRepository: Repository<Produto>,
         private categoriaService: CategoriaService
-    ){}
+    ) { }
 
-    async findAll(): Promise<Produto[]>{
+    async findAll(): Promise<Produto[]> {
         return this.produtoRepository.find({
-            relations:{
+            relations: {
                 categoria: true
             }
-        }); 
+        });
     }
 
-    async findById(id: number): Promise<Produto>{
-       
+    async findById(id: number): Promise<Produto> {
+
         const produto = await this.produtoRepository.findOne({
             where: {
                 id
             },
-            relations:{
+            relations: {
                 categoria: true
             }
         })
 
-        if(!produto){
+        if (!produto) {
             throw new HttpException('Produto não encontrado!', HttpStatus.NOT_FOUND)
         }
         return produto;
-        
+
     }
 
 
 
-    async listByPreco(minPreco: number): Promise<Produto[]>{
+    async listPrecoCrescente(minPreco: number): Promise<Produto[]> {
         return this.produtoRepository.find({
             where: {
                 preco: MoreThanOrEqual(minPreco)
-                },
-                order: {
-                    preco: 'ASC'
-                }
+            },
+            order: {
+                preco: 'ASC'
+            }
+        });
+    }
+
+    async listPrecoDecrescente(minPreco: number): Promise<Produto[]> {
+        return this.produtoRepository.find({
+            where: {
+                preco: LessThanOrEqual(minPreco)
+            },
+            order: {
+                preco: 'DESC'
+            }
         });
     }
 
 
 
-
-
-    async findByNome(nome: string): Promise<Produto[]>{
+    async findByNome(nome: string): Promise<Produto[]> {
         return this.produtoRepository.find({
-            where:{
-                nome: ILike(`%${nome}%`) 
+            where: {
+                nome: ILike(`%${nome}%`)
             },
-            relations:{
+            relations: {
                 categoria: true
             }
         });
     }
 
-    async create(produto: Produto): Promise<Produto>{
+    async create(produto: Produto): Promise<Produto> {
 
         await this.categoriaService.findById(produto.categoria.id)
-        
+
         return await this.produtoRepository.save(produto);
     }
 
-    async update(produto: Produto): Promise<Produto>{
-        
+    async update(produto: Produto): Promise<Produto> {
+
         await this.findById(produto.id)
 
         await this.categoriaService.findById(produto.categoria.id)
-        
+
         return await this.produtoRepository.save(produto);
     }
 
-    async delete(id: number): Promise<DeleteResult>{
+    async delete(id: number): Promise<DeleteResult> {
 
         await this.findById(id)
-        
+
         return await this.produtoRepository.delete(id)
     }
 }
